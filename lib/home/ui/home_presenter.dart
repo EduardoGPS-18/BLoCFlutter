@@ -5,4 +5,6 @@ abstract class HomePresenter {
   HomeState get currentHomeState;
 
   void emmitEvent<E extends HomeEvent>(E event);
+
+  Future<void> submitForm();
 }
