@@ -25,10 +25,15 @@ class HomePage extends StatelessWidget {
               case HomeStateEnterForm:
                 final formState = state as HomeStateEnterForm;
 
-                final emailError =
-                    formState.emailError != ValidationError.noError ? formState.emailError.description : null;
-                final passwordError =
-                    formState.passwordError != ValidationError.noError ? formState.passwordError.description : null;
+                final showEmailError = formState.emailError != ValidationError.noError &&
+                    formState.emailError != ValidationError.requiredFieldWithoutBorder;
+                final emailError = showEmailError ? formState.emailError.description : null;
+
+                final showPasswordError = formState.passwordError != ValidationError.noError &&
+                    formState.passwordError != ValidationError.requiredFieldWithoutBorder;
+                final passwordError = showPasswordError ? formState.passwordError.description : null;
+
+                void submitFunction() => presenter.emmitEvent(HomeEventSubmit());
 
                 return FormWidget(
                   emailError: emailError,
@@ -39,7 +44,7 @@ class HomePage extends StatelessWidget {
                   validatePassword: (password) => presenter.emmitEvent(
                     HomeValidateForm(fieldName: 'password', value: password),
                   ),
-                  onSubmit: (formState.isFormValid == true) ? () {} : null,
+                  onSubmit: (formState.isFormValid == true) ? submitFunction : null,
                 );
 
               case HomeStateLoading:
@@ -130,6 +135,8 @@ extension on ValidationError {
         return 'Campo inválido!';
       case ValidationError.requiredField:
         return 'Campo obrigatório';
+      case ValidationError.requiredFieldWithoutBorder:
+        return 'Campo obrigatório sem error!';
     }
   }
 }

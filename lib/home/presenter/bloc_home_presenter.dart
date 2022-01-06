@@ -9,11 +9,12 @@ enum ValidationError {
   noError,
   invalidField,
   requiredField,
+  requiredFieldWithoutBorder,
 }
 
 final _initialState = HomeStateEnterForm(
-  emailError: ValidationError.requiredField,
-  passwordError: ValidationError.requiredField,
+  emailError: ValidationError.requiredFieldWithoutBorder,
+  passwordError: ValidationError.requiredFieldWithoutBorder,
   isFormValid: false,
 );
 
