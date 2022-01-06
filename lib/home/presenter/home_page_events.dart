@@ -1,4 +1,4 @@
-import 'package:bloc_test/home/ui/ui.dart';
+import '../ui/ui.dart';
 
 class HomeValidateForm implements HomeEvent {
   String fieldName;
