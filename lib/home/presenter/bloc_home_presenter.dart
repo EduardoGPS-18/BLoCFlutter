@@ -23,11 +23,11 @@ final _initialState = HomeStateEnterForm(
 class HomeBloc extends Bloc<HomeEvent, HomeState> with BlocPresenter implements HomePresenter {
   HomeBloc() : super(_initialState) {
     on<HomeValidateForm>((event, emit) => emit(validateField(event.fieldName, event.value)));
-    on<HomeEventSubmit>((event, emit) => submitForm());
+    on<HomeEventSubmit>((event, emit) => _submitForm());
   }
 
   @override
-  Future<void> submitForm() async {
+  Future<void> _submitForm() async {
     final formState = state as HomeStateEnterForm;
     final loginParams = {'email': formState.email, 'password': formState.password};
 
