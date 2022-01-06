@@ -22,7 +22,7 @@ final _initialState = HomeStateEnterForm(
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> with BlocPresenter implements HomePresenter {
   HomeBloc() : super(_initialState) {
-    on<HomeValidateForm>((event, emit) => emit(validateField(event.fieldName, event.value)));
+    on<HomeValidateForm>((event, emit) => emit(_validateField(event.fieldName, event.value)));
     on<HomeEventSubmit>((event, emit) => _submitForm());
   }
 
@@ -39,7 +39,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> with BlocPresenter implements 
     emit(_initialState.copyWith());
   }
 
-  HomeStateEnterForm validateField(String fieldName, String? value) {
+  HomeStateEnterForm _validateField(String fieldName, String? value) {
     final stateForm = state as HomeStateEnterForm;
     var newState = stateForm.copyWith();
 

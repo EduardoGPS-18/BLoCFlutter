@@ -25,12 +25,14 @@ class HomePage extends StatelessWidget {
               case HomeStateEnterForm:
                 final formState = state as HomeStateEnterForm;
 
-                final showEmailError = formState.emailError != ValidationError.noError &&
-                    formState.emailError != ValidationError.requiredFieldWithoutBorder;
+                final hasEmailError = formState.emailError != ValidationError.noError;
+                final showEmailInputBorder = formState.emailError != ValidationError.requiredFieldWithoutBorder;
+                final showEmailError = hasEmailError && showEmailInputBorder;
                 final emailError = showEmailError ? formState.emailError.description : null;
 
-                final showPasswordError = formState.passwordError != ValidationError.noError &&
-                    formState.passwordError != ValidationError.requiredFieldWithoutBorder;
+                final hasPasswordError = formState.passwordError != ValidationError.noError;
+                final showPassInputBorder = formState.passwordError != ValidationError.requiredFieldWithoutBorder;
+                final showPasswordError = hasPasswordError && showPassInputBorder;
                 final passwordError = showPasswordError ? formState.passwordError.description : null;
 
                 void submitFunction() => presenter.emmitEvent(HomeEventSubmit());
@@ -51,7 +53,7 @@ class HomePage extends StatelessWidget {
                 return const LoadingWidget();
             }
             return const Center(
-              child: Text('Empty State'),
+              child: Text('Ocorreu um erro ao carregar o estado!'),
             );
           },
         ),
