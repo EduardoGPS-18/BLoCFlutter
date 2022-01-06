@@ -26,9 +26,9 @@ class HomePage extends StatelessWidget {
                 final formState = state as HomeStateEnterForm;
 
                 final emailError =
-                    formState.emailError != ValidationError.noError ? formState.emailError?.description : null;
+                    formState.emailError != ValidationError.noError ? formState.emailError.description : null;
                 final passwordError =
-                    formState.passwordError != ValidationError.noError ? formState.passwordError?.description : null;
+                    formState.passwordError != ValidationError.noError ? formState.passwordError.description : null;
 
                 return FormWidget(
                   emailError: emailError,
@@ -39,6 +39,7 @@ class HomePage extends StatelessWidget {
                   validatePassword: (password) => presenter.emmitEvent(
                     HomeValidateForm(fieldName: 'password', value: password),
                   ),
+                  onSubmit: (formState.isFormValid == true) ? () {} : null,
                 );
 
               case HomeStateLoading:
@@ -59,7 +60,7 @@ class FormWidget extends StatelessWidget {
   final void Function(String)? validateEmail;
   final String? passwordError;
   final void Function(String)? validatePassword;
-  final void Function()? submitFunction;
+  final void Function()? onSubmit;
 
   const FormWidget({
     Key? key,
@@ -67,7 +68,7 @@ class FormWidget extends StatelessWidget {
     this.validateEmail,
     this.passwordError,
     this.validatePassword,
-    this.submitFunction,
+    this.onSubmit,
   }) : super(key: key);
 
   @override
@@ -97,7 +98,7 @@ class FormWidget extends StatelessWidget {
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: submitFunction,
+                  onPressed: onSubmit,
                   child: const Text('Entrar!'),
                 ),
               ),

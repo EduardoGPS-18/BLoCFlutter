@@ -12,8 +12,9 @@ enum ValidationError {
 }
 
 final _initialState = HomeStateEnterForm(
-  emailError: null,
-  passwordError: null,
+  emailError: ValidationError.noError,
+  passwordError: ValidationError.noError,
+  isFormValid: false,
 );
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> with BlocPresenter implements HomePresenter {
@@ -27,14 +28,23 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> with BlocPresenter implements 
 
   HomeStateEnterForm validateField(String fieldName, String? value) {
     final stateForm = state as HomeStateEnterForm;
+    var newState = stateForm.copyWith();
+
     if (fieldName == 'email') {
       final emailError = value?.contains('@') == true ? ValidationError.noError : ValidationError.invalidField;
-      return stateForm.copyWith(HomeStateEnterForm(emailError: emailError));
+      newState = stateForm.copyWith(emailError: emailError);
     }
     if (fieldName == 'password') {
       final passwordError = (value?.length ?? 0) >= 10 ? ValidationError.noError : ValidationError.invalidField;
-      return stateForm.copyWith(HomeStateEnterForm(passwordError: passwordError));
+      newState = stateForm.copyWith(passwordError: passwordError);
     }
-    return HomeStateEnterForm();
+
+    final isFormValid =
+        newState.emailError == ValidationError.noError && newState.passwordError == ValidationError.noError;
+    return newState.copyWith(
+      emailError: newState.emailError,
+      passwordError: newState.passwordError,
+      isFormValid: isFormValid,
+    );
   }
 }
