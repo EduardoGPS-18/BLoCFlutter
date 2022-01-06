@@ -18,6 +18,7 @@ class HomePage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: StreamBuilder<HomeState>(
           initialData: presenter.currentHomeState,
+          stream: presenter.homeStateStream,
           builder: (context, snapshot) {
             final state = snapshot.data ?? presenter.currentHomeState;
             switch (state.runtimeType) {
