@@ -15,7 +15,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
         child: StreamBuilder<HomeState>(
           initialData: presenter.currentHomeState,
           stream: presenter.homeStateStream,
@@ -40,6 +40,7 @@ class HomePage extends StatelessWidget {
                     HomeValidateForm(fieldName: 'password', value: password),
                   ),
                 );
+
               case HomeStateLoading:
                 return const LoadingWidget();
             }
@@ -58,12 +59,15 @@ class FormWidget extends StatelessWidget {
   final void Function(String)? validateEmail;
   final String? passwordError;
   final void Function(String)? validatePassword;
+  final void Function()? submitFunction;
+
   const FormWidget({
     Key? key,
     this.emailError,
-    this.passwordError,
     this.validateEmail,
+    this.passwordError,
     this.validatePassword,
+    this.submitFunction,
   }) : super(key: key);
 
   @override
@@ -87,6 +91,17 @@ class FormWidget extends StatelessWidget {
               errorText: passwordError,
               labelText: 'PASSWORD',
             ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: submitFunction,
+                  child: const Text('Entrar!'),
+                ),
+              ),
+            ],
           ),
         ],
       ),
