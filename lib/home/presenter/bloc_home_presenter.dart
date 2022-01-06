@@ -24,6 +24,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> with BlocPresenter implements 
         emit(validateField(event.fieldName, event.value));
       },
     );
+
+    on<HomeEventSubmit>(
+      (event, emit) {
+        emit(HomeStateLoading());
+      },
+    );
   }
 
   HomeStateEnterForm validateField(String fieldName, String? value) {

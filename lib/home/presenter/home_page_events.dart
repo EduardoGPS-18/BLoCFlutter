@@ -5,3 +5,5 @@ class HomeValidateForm implements HomeEvent {
   String? value;
   HomeValidateForm({required this.fieldName, this.value});
 }
+
+class HomeEventSubmit implements HomeEvent {}
