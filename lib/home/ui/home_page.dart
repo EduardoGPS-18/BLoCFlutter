@@ -23,14 +23,21 @@ class HomePage extends StatelessWidget {
             switch (state.runtimeType) {
               case HomeStateEnterForm:
                 final formState = state as HomeStateEnterForm;
+
+                final emailError =
+                    formState.emailError != ValidationError.noError ? formState.emailError?.description : null;
+                final passwordError =
+                    formState.passwordError != ValidationError.noError ? formState.passwordError?.description : null;
+
                 return FormWidget(
-                  emailError:
-                      formState.emailError != ValidationError.noError ? formState.emailError?.description : null,
-                  validateEmail: (email) => presenter.emmitEvent(HomeValidateForm(fieldName: 'email', value: email)),
-                  passwordError:
-                      formState.passwordError != ValidationError.noError ? formState.passwordError?.description : null,
-                  validatePassword: (password) =>
-                      presenter.emmitEvent(HomeValidateForm(fieldName: 'password', value: password)),
+                  emailError: emailError,
+                  validateEmail: (email) => presenter.emmitEvent(
+                    HomeValidateForm(fieldName: 'email', value: email),
+                  ),
+                  passwordError: passwordError,
+                  validatePassword: (password) => presenter.emmitEvent(
+                    HomeValidateForm(fieldName: 'password', value: password),
+                  ),
                 );
               case HomeStateLoading:
                 return const LoadingWidget();
