@@ -29,8 +29,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> with BlocPresenter implements 
     final stateForm = state as HomeStateEnterForm;
     if (fieldName == 'email') {
       final emailError = value?.contains('@') == true ? ValidationError.noError : ValidationError.invalidField;
-      final toSendEmail = stateForm.copyWith(HomeStateEnterForm(emailError: emailError));
-      return toSendEmail;
+      return stateForm.copyWith(HomeStateEnterForm(emailError: emailError));
     }
     if (fieldName == 'password') {
       final passwordError = (value?.length ?? 0) >= 10 ? ValidationError.noError : ValidationError.invalidField;
