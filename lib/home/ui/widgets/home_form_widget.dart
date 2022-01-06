@@ -30,6 +30,7 @@ class HomeFormWidget extends StatelessWidget {
             ),
             onChanged: validateEmail,
           ),
+          const SizedBox(height: 24),
           TextField(
             onChanged: validatePassword,
             decoration: InputDecoration(
