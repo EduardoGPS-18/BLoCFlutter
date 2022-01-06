@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:bloc_test/home/home.dart';
+import '/home/home.dart';
+import './widgets/widgets.dart';
 
 abstract class HomeEvent {}
 
@@ -37,7 +38,7 @@ class HomePage extends StatelessWidget {
 
                 void submitFunction() => presenter.emmitEvent(HomeEventSubmit());
 
-                return FormWidget(
+                return HomeFormWidget(
                   emailError: emailError,
                   validateEmail: (email) => presenter.emmitEvent(
                     HomeValidateForm(fieldName: 'email', value: email),
@@ -51,79 +52,15 @@ class HomePage extends StatelessWidget {
 
               case HomeStateLoading:
                 return const LoadingWidget();
+
+              default:
+                return const Center(
+                  child: Text('Ocorreu um erro ao carregar o estado!'),
+                );
             }
-            return const Center(
-              child: Text('Ocorreu um erro ao carregar o estado!'),
-            );
           },
         ),
       ),
-    );
-  }
-}
-
-class FormWidget extends StatelessWidget {
-  final String? emailError;
-  final void Function(String)? validateEmail;
-  final String? passwordError;
-  final void Function(String)? validatePassword;
-  final void Function()? onSubmit;
-
-  const FormWidget({
-    Key? key,
-    this.emailError,
-    this.validateEmail,
-    this.passwordError,
-    this.validatePassword,
-    this.onSubmit,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TextField(
-            decoration: InputDecoration(
-              hintText: 'Digite o email',
-              labelText: 'EMAIL',
-              errorText: emailError,
-            ),
-            onChanged: validateEmail,
-          ),
-          TextField(
-            onChanged: validatePassword,
-            decoration: InputDecoration(
-              hintText: 'Digite a senha',
-              errorText: passwordError,
-              labelText: 'PASSWORD',
-            ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: onSubmit,
-                  child: const Text('Entrar!'),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class LoadingWidget extends StatelessWidget {
-  const LoadingWidget({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: CircularProgressIndicator(),
     );
   }
 }
