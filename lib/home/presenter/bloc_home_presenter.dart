@@ -12,8 +12,8 @@ enum ValidationError {
 }
 
 final _initialState = HomeStateEnterForm(
-  emailError: ValidationError.noError,
-  passwordError: ValidationError.noError,
+  emailError: ValidationError.requiredField,
+  passwordError: ValidationError.requiredField,
   isFormValid: false,
 );
 
