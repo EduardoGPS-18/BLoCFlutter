@@ -22,26 +22,105 @@ class HomePage extends StatelessWidget {
         resizeToAvoidBottomInset: false,
         body: Padding(
           padding: const EdgeInsets.all(24),
-          child: StreamBuilder<HomeState>(
-            initialData: presenter.currentHomeState,
-            stream: presenter.homeStateStream,
-            builder: (context, snapshot) {
-              final state = snapshot.data ?? presenter.currentHomeState;
-              switch (state.runtimeType) {
-                case HomeStateEnterForm:
+          child: SafeArea(
+            child: StreamBuilder<HomeState>(
+              initialData: presenter.currentHomeState,
+              stream: presenter.homeStateStream,
+              builder: (ctx, snapshot) {
+                final state = snapshot.data ?? presenter.currentHomeState;
+
+                if (state.runtimeType == HomeStateEnterForm) {
                   final formState = state as HomeStateEnterForm;
 
                   final hasEmailError = formState.emailError != ValidationError.noError;
-                  final showEmailInputBorder = formState.emailError != ValidationError.requiredFieldWithoutBorder;
-                  final showEmailError = hasEmailError && showEmailInputBorder;
-                  final emailError = showEmailError ? formState.emailError.description : null;
+                  final emailError = hasEmailError ? formState.emailError.description : null;
 
                   final hasPasswordError = formState.passwordError != ValidationError.noError;
-                  final showPassInputBorder = formState.passwordError != ValidationError.requiredFieldWithoutBorder;
-                  final showPasswordError = hasPasswordError && showPassInputBorder;
-                  final passwordError = showPasswordError ? formState.passwordError.description : null;
+                  final passwordError = hasPasswordError ? formState.passwordError.description : null;
 
                   void submitFunction() => presenter.emmitEvent(HomeEventSubmit());
+
+                  if (state.closePage) {
+                    WidgetsBinding.instance?.addPostFrameCallback((_) {
+                      if (Navigator.canPop(context)) {
+                        Navigator.pop(context);
+                      }
+                    });
+                  }
+
+                  if (state.proccessResult == ProccessResult.success) {
+                    WidgetsBinding.instance?.addPostFrameCallback((_) {
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          backgroundColor: Colors.green[200],
+                          title: const Text('SUCESSO!!!!!'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                presenter.emmitEvent(HomeEventCloseProccess());
+                              },
+                              child: const Text('OK!'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                presenter.emmitEvent(HomeEventClosePage());
+                              },
+                              child: const Text('SAIR!'),
+                            ),
+                          ],
+                          content: const Text('Processo finalizado com sucesso!!'),
+                        ),
+                      );
+                    });
+                  } else if (state.proccessResult == ProccessResult.error) {
+                    WidgetsBinding.instance?.addPostFrameCallback((_) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) => AlertDialog(
+                          title: const Text('Error!!!!!!'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                presenter.emmitEvent(HomeEventCloseProccess());
+                              },
+                              child: const Text('OK!'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                presenter.emmitEvent(HomeEventClosePage());
+                              },
+                              child: const Text('SAIR!'),
+                            ),
+                          ],
+                          backgroundColor: Colors.red[200],
+                          content: const Text('Ocorreu um erro no processo!!!'),
+                        ),
+                      );
+                    });
+                  } else if (state.proccessResult == ProccessResult.close) {
+                    WidgetsBinding.instance?.addPostFrameCallback((_) {
+                      Navigator.pop(context);
+                    });
+                  }
+
+                  if (state.proccessLoading == ProccessLoading.start) {
+                    WidgetsBinding.instance?.addPostFrameCallback((_) {
+                      showDialog(
+                        barrierDismissible: false,
+                        context: context,
+                        builder: (_) => const AlertDialog(
+                          title: Text('Loading...'),
+                          content: Text('Aguarde!'),
+                        ),
+                      );
+                    });
+                  } else if (state.proccessLoading == ProccessLoading.end) {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
+                  }
 
                   return HomeFormWidget(
                     emailError: emailError,
@@ -53,17 +132,15 @@ class HomePage extends StatelessWidget {
                       HomeValidateForm(fieldName: 'password', value: password),
                     ),
                     onSubmit: (formState.isFormValid == true) ? submitFunction : null,
+                    backButton: () {
+                      presenter.emmitEvent(HomeEventClosePage());
+                    },
                   );
+                }
 
-                case HomeStateLoading:
-                  return const LoadingWidget();
-
-                default:
-                  return const Center(
-                    child: Text('Ocorreu um erro ao carregar o estado!'),
-                  );
-              }
-            },
+                return const Center();
+              },
+            ),
           ),
         ),
       ),
@@ -80,8 +157,6 @@ extension on ValidationError {
         return 'Campo inválido!';
       case ValidationError.requiredField:
         return 'Campo obrigatório';
-      case ValidationError.requiredFieldWithoutBorder:
-        return 'Campo obrigatório sem error!';
     }
   }
 }
