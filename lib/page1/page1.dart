@@ -8,19 +8,17 @@ class Page1 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Container(
-          child: ElevatedButton(
-            child: const Text('Ir para Home!'),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => HomePage(
-                    presenter: HomeBloc(),
-                  ),
+        child: ElevatedButton(
+          child: const Text('Ir para Home!'),
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => HomePage(
+                  presenter: HomeBloc(),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
