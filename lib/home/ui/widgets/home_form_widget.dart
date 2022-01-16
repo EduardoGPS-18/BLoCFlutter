@@ -6,10 +6,12 @@ class HomeFormWidget extends StatelessWidget {
   final String? passwordError;
   final void Function(String)? validatePassword;
   final void Function()? onSubmit;
+  final void Function()? backButton;
 
   const HomeFormWidget({
     Key? key,
     this.emailError,
+    this.backButton,
     this.validateEmail,
     this.passwordError,
     this.validatePassword,
@@ -50,6 +52,7 @@ class HomeFormWidget extends StatelessWidget {
               ),
             ],
           ),
+          TextButton(onPressed: backButton, child: const Text('Voltar')),
         ],
       ),
     );

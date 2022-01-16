@@ -7,3 +7,7 @@ class HomeValidateForm implements HomeEvent {
 }
 
 class HomeEventSubmit implements HomeEvent {}
+
+class HomeEventCloseProccess implements HomeEvent {}
+
+class HomeEventClosePage implements HomeEvent {}
