@@ -1,4 +1,4 @@
-import '../home.dart';
+import 'package:bloc_test/presentation/home/home.dart';
 
 abstract class HomePresenter {
   Stream<HomeState> get homeStateStream;

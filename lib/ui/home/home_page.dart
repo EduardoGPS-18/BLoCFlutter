@@ -1,9 +1,9 @@
+import 'package:bloc_test/presentation/home/home.dart';
+import 'package:bloc_test/presentation/validations/validation.dart';
+import 'package:bloc_test/ui/ui.dart';
 import 'package:flutter/material.dart';
 
-import '/home/home.dart';
 import './widgets/widgets.dart';
-
-abstract class HomeEvent {}
 
 class HomePage extends StatelessWidget {
   final HomePresenter presenter;
@@ -125,11 +125,11 @@ class HomePage extends StatelessWidget {
                   return HomeFormWidget(
                     emailError: emailError,
                     validateEmail: (email) => presenter.emmitEvent(
-                      HomeValidateForm(fieldName: 'email', value: email),
+                      HomeValidateEmail(fieldName: 'email', value: email),
                     ),
                     passwordError: passwordError,
                     validatePassword: (password) => presenter.emmitEvent(
-                      HomeValidateForm(fieldName: 'password', value: password),
+                      HomeValidatePassword(fieldName: 'password', value: password),
                     ),
                     onSubmit: (formState.isFormValid == true) ? submitFunction : null,
                     backButton: () {
@@ -157,6 +157,10 @@ extension on ValidationError {
         return 'Campo inválido!';
       case ValidationError.requiredField:
         return 'Campo obrigatório';
+      case ValidationError.fieldsDoNotMatch:
+        return 'Campos diferentes';
+      case ValidationError.minLength:
+        return 'Tamanho minimo não atingido';
     }
   }
 }

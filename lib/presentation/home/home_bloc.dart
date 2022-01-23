@@ -1,14 +1,10 @@
 import 'package:bloc/bloc.dart';
+import 'package:bloc_test/domain/usecases/usecases.dart';
+import 'package:bloc_test/presentation/home/home.dart';
+import 'package:bloc_test/presentation/validations/validation.dart';
+import 'package:bloc_test/ui/ui.dart';
 
 import '../helpers/helpers.dart';
-import '../ui/ui.dart';
-import 'presenter.dart';
-
-enum ValidationError {
-  noError,
-  invalidField,
-  requiredField,
-}
 
 final _initialState = HomeStateEnterForm(
   email: '',
@@ -18,11 +14,15 @@ final _initialState = HomeStateEnterForm(
   isFormValid: true,
 );
 
-// Only stay on HomeBloc class, methods thats used to map an event to a new state
-// any other helper method stay in helper extension (HomeBlocHelpers)
 class HomeBloc extends Bloc<HomeEvent, HomeState> with BlocPresenter implements HomePresenter {
-  HomeBloc() : super(_initialState) {
-    on<HomeValidateForm>(_validateField);
+  LoginUseCase loginUseCase;
+  Validation validation;
+
+  HomeBloc({
+    required this.loginUseCase,
+    required this.validation,
+  }) : super(_initialState) {
+    on<HomeValidateForm>(_validateForm);
     on<HomeEventSubmit>(_submitForm);
     on<HomeEventCloseProccess>(_closeProccessResult);
     on<HomeEventClosePage>(_closePage);
@@ -30,13 +30,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> with BlocPresenter implements 
 
   Future<void> _submitForm(HomeEventSubmit event, Emitter<HomeState> emit) async {
     final formState = state as HomeStateEnterForm;
-    final loginParams = {'email': formState.email, 'password': formState.password};
     emit(formState.copyWith(proccessLoading: ProccessLoading.start));
 
-    // USECASE LOGIN
-    await Future.delayed(const Duration(milliseconds: 200), () {
-      print('LOGIN FEITO COM $loginParams');
-    });
+    loginUseCase(email: formState.email, password: formState.password);
 
     emit(formState.copyWith(proccessLoading: ProccessLoading.end));
     await Future.delayed(const Duration(milliseconds: 20));
@@ -47,27 +43,35 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> with BlocPresenter implements 
     emit(formState.copyWith(proccessResult: ProccessResult.success));
   }
 
-  void _validateField(HomeValidateForm event, Emitter<HomeState> emit) {
-    final stateForm = state as HomeStateEnterForm;
-    final String fieldName = event.fieldName;
-    final String? value = event.value;
-    var newState = stateForm.copyWith();
+  bool isFormValid(HomeStateEnterForm formState) {
+    final isEmailValid = formState.emailError == ValidationError.noError && formState.email.isNotEmpty;
+    final isPasswordValid = formState.passwordError == ValidationError.noError && formState.password.isNotEmpty;
+    return isEmailValid && isPasswordValid;
+  }
 
-    if (fieldName == 'email') {
-      final emailError = value?.contains('@') == true ? ValidationError.noError : ValidationError.invalidField;
-      newState = stateForm.copyWith(emailError: emailError, email: value);
+  void _validateForm(HomeValidateForm event, Emitter<HomeState> emit) {
+    final formState = state as HomeStateEnterForm;
+    HomeStateEnterForm newState = formState;
+    if (event is HomeValidateEmail) {
+      newState = _validateEmail(event, formState);
+    } else if (event is HomeValidatePassword) {
+      newState = _validatePassword(event, formState);
     }
-    if (fieldName == 'password') {
-      final passwordError = (value?.length ?? 0) >= 10 ? ValidationError.noError : ValidationError.invalidField;
-      newState = stateForm.copyWith(passwordError: passwordError, password: value);
-    }
+    emit(newState.copyWith(isFormValid: isFormValid(newState)));
+  }
 
-    final isFormValid = newState.emailError == ValidationError.noError &&
-        stateForm.email.isNotEmpty &&
-        newState.passwordError == ValidationError.noError &&
-        stateForm.password.isNotEmpty;
+  HomeStateEnterForm _validateEmail(HomeValidateEmail event, HomeStateEnterForm formState) {
+    final error = validation.validate(field: event.fieldName, input: {
+      'email': formState.email,
+    });
+    return formState.copyWith(emailError: error, email: event.value);
+  }
 
-    emit(newState.copyWith(isFormValid: isFormValid));
+  HomeStateEnterForm _validatePassword(HomeValidatePassword event, HomeStateEnterForm formState) {
+    final error = validation.validate(field: event.fieldName, input: {
+      'password': formState.password,
+    });
+    return formState.copyWith(passwordError: error, password: event.value);
   }
 
   Future<void> _closeProccessResult(HomeEventCloseProccess event, Emitter<HomeState> emit) async {
