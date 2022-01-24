@@ -5,12 +5,45 @@ import 'package:flutter/material.dart';
 
 import './widgets/widgets.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final HomePresenter presenter;
   const HomePage({
     Key? key,
     required this.presenter,
   }) : super(key: key);
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    widget.presenter.homeStateStream.listen((state) {
+      if (state is HomeStateEnterForm) {
+        if (state.proccessResult == ProccessResult.success) {
+          WidgetsBinding.instance?.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context)
+              ..clearSnackBars()
+              ..showSnackBar(const SnackBar(
+                content: Text('Authenticado com sucesso!'),
+                backgroundColor: Colors.green,
+              ));
+          });
+        } else if (state.proccessResult == ProccessResult.error) {
+          WidgetsBinding.instance?.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context)
+              ..clearSnackBars()
+              ..showSnackBar(const SnackBar(
+                content: Text('Ocorreu um erro!'),
+                backgroundColor: Colors.red,
+              ));
+          });
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,117 +57,34 @@ class HomePage extends StatelessWidget {
           padding: const EdgeInsets.all(24),
           child: SafeArea(
             child: StreamBuilder<HomeState>(
-              initialData: presenter.currentHomeState,
-              stream: presenter.homeStateStream,
+              initialData: widget.presenter.currentHomeState,
+              stream: widget.presenter.homeStateStream,
               builder: (ctx, snapshot) {
-                final state = snapshot.data ?? presenter.currentHomeState;
+                final state = snapshot.data ?? widget.presenter.currentHomeState;
 
-                if (state.runtimeType == HomeStateEnterForm) {
-                  final formState = state as HomeStateEnterForm;
+                if (state is HomeStateEnterForm) {
+                  final hasEmailError = state.emailError != ValidationError.noError;
+                  final emailError = hasEmailError ? state.emailError.description : null;
 
-                  final hasEmailError = formState.emailError != ValidationError.noError;
-                  final emailError = hasEmailError ? formState.emailError.description : null;
+                  final hasPasswordError = state.passwordError != ValidationError.noError;
+                  final passwordError = hasPasswordError ? state.passwordError.description : null;
 
-                  final hasPasswordError = formState.passwordError != ValidationError.noError;
-                  final passwordError = hasPasswordError ? formState.passwordError.description : null;
-
-                  void submitFunction() => presenter.emmitEvent(HomeEventSubmit());
-
-                  if (state.closePage) {
-                    WidgetsBinding.instance?.addPostFrameCallback((_) {
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      }
-                    });
-                  }
-
-                  if (state.proccessResult == ProccessResult.success) {
-                    WidgetsBinding.instance?.addPostFrameCallback((_) {
-                      showDialog(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                          backgroundColor: Colors.green[200],
-                          title: const Text('SUCESSO!!!!!'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                presenter.emmitEvent(HomeEventCloseProccess());
-                              },
-                              child: const Text('OK!'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                presenter.emmitEvent(HomeEventClosePage());
-                              },
-                              child: const Text('SAIR!'),
-                            ),
-                          ],
-                          content: const Text('Processo finalizado com sucesso!!'),
-                        ),
-                      );
-                    });
-                  } else if (state.proccessResult == ProccessResult.error) {
-                    WidgetsBinding.instance?.addPostFrameCallback((_) {
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (_) => AlertDialog(
-                          title: const Text('Error!!!!!!'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                presenter.emmitEvent(HomeEventCloseProccess());
-                              },
-                              child: const Text('OK!'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                presenter.emmitEvent(HomeEventClosePage());
-                              },
-                              child: const Text('SAIR!'),
-                            ),
-                          ],
-                          backgroundColor: Colors.red[200],
-                          content: const Text('Ocorreu um erro no processo!!!'),
-                        ),
-                      );
-                    });
-                  } else if (state.proccessResult == ProccessResult.close) {
-                    WidgetsBinding.instance?.addPostFrameCallback((_) {
-                      Navigator.pop(context);
-                    });
-                  }
-
-                  if (state.proccessLoading == ProccessLoading.start) {
-                    WidgetsBinding.instance?.addPostFrameCallback((_) {
-                      showDialog(
-                        barrierDismissible: false,
-                        context: context,
-                        builder: (_) => const AlertDialog(
-                          title: Text('Loading...'),
-                          content: Text('Aguarde!'),
-                        ),
-                      );
-                    });
-                  } else if (state.proccessLoading == ProccessLoading.end) {
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context);
-                    }
-                  }
+                  void submitFunction() => widget.presenter.emmitEvent(HomeEventSubmit());
 
                   return HomeFormWidget(
                     emailError: emailError,
-                    validateEmail: (email) => presenter.emmitEvent(
+                    validateEmail: (email) => widget.presenter.emmitEvent(
                       HomeValidateEmail(fieldName: 'email', value: email),
                     ),
                     passwordError: passwordError,
-                    validatePassword: (password) => presenter.emmitEvent(
+                    validatePassword: (password) => widget.presenter.emmitEvent(
                       HomeValidatePassword(fieldName: 'password', value: password),
                     ),
-                    onSubmit: (formState.isFormValid == true) ? submitFunction : null,
+                    onSubmit: (state.isFormValid == true) ? submitFunction : null,
                     backButton: () {
-                      presenter.emmitEvent(HomeEventClosePage());
+                      widget.presenter.emmitEvent(HomeEventClosePage());
                     },
+                    isLoading: state.proccessLoading == ProccessLoading.loading,
                   );
                 }
 

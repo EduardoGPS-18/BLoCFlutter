@@ -24,23 +24,21 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> with BlocPresenter implements 
   }) : super(_initialState) {
     on<HomeValidateForm>(_validateForm);
     on<HomeEventSubmit>(_submitForm);
-    on<HomeEventCloseProccess>(_closeProccessResult);
-    on<HomeEventClosePage>(_closePage);
   }
 
   Future<void> _submitForm(HomeEventSubmit event, Emitter<HomeState> emit) async {
     final formState = state as HomeStateEnterForm;
-    emit(formState.copyWith(proccessLoading: ProccessLoading.start));
+    emit(formState.copyWith(proccessLoading: ProccessLoading.loading));
 
-    loginUseCase(email: formState.email, password: formState.password);
-
-    emit(formState.copyWith(proccessLoading: ProccessLoading.end));
-    await Future.delayed(const Duration(milliseconds: 20));
-    emit(formState.copyWith(proccessLoading: ProccessLoading.none));
-
-    await Future.delayed(const Duration(milliseconds: 100));
-
+    try {
+      await loginUseCase(email: formState.email, password: formState.password);
+    } on Exception {
+      emit(formState.copyWith(proccessLoading: ProccessLoading.none));
+      emit(formState.copyWith(proccessResult: ProccessResult.error));
+      return;
+    }
     emit(formState.copyWith(proccessResult: ProccessResult.success));
+    emit(formState.copyWith(proccessResult: ProccessResult.none));
   }
 
   bool isFormValid(HomeStateEnterForm formState) {
@@ -72,27 +70,5 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> with BlocPresenter implements 
       'password': formState.password,
     });
     return formState.copyWith(passwordError: error, password: event.value);
-  }
-
-  Future<void> _closeProccessResult(HomeEventCloseProccess event, Emitter<HomeState> emit) async {
-    final formState = await _closeProccessIfItsOpen(emit);
-    emit(formState.copyWith(proccessResult: ProccessResult.none));
-  }
-
-  Future<void> _closePage(HomeEventClosePage event, Emitter<HomeState> emit) async {
-    final formState = await _closeProccessIfItsOpen(emit);
-    emit(formState.copyWith(closePage: true));
-    await Future.delayed(const Duration(milliseconds: 20));
-  }
-}
-
-extension HomeBlocHelpers on HomeBloc {
-  Future<HomeStateEnterForm> _closeProccessIfItsOpen(Emitter<HomeState> emit) async {
-    final formState = state as HomeStateEnterForm;
-    if (formState.proccessResult.isOpen) {
-      emit(formState.copyWith(proccessResult: ProccessResult.close));
-      await Future.delayed(const Duration(milliseconds: 20));
-    }
-    return formState;
   }
 }

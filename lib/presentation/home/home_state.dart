@@ -4,8 +4,8 @@ abstract class HomeState {}
 
 class HomeStateLoading implements HomeState {}
 
-enum ProccessLoading { none, start, end }
-enum ProccessResult { success, error, close, none }
+enum ProccessLoading { none, loading }
+enum ProccessResult { success, error, none }
 
 extension IsOpen on ProccessResult {
   bool get isOpen => this == ProccessResult.success || this == ProccessResult.error ? true : false;

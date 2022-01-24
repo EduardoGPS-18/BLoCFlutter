@@ -7,6 +7,7 @@ class HomeFormWidget extends StatelessWidget {
   final void Function(String)? validatePassword;
   final void Function()? onSubmit;
   final void Function()? backButton;
+  final bool? isLoading;
 
   const HomeFormWidget({
     Key? key,
@@ -16,6 +17,7 @@ class HomeFormWidget extends StatelessWidget {
     this.passwordError,
     this.validatePassword,
     this.onSubmit,
+    this.isLoading,
   }) : super(key: key);
 
   @override
@@ -46,13 +48,22 @@ class HomeFormWidget extends StatelessWidget {
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: onSubmit,
-                  child: const Text('Entrar!'),
+                  onPressed: isLoading == true ? null : onSubmit,
+                  child: isLoading == true
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(),
+                        )
+                      : const Text('Entrar!'),
                 ),
               ),
             ],
           ),
-          TextButton(onPressed: backButton, child: const Text('Voltar')),
+          TextButton(
+            onPressed: backButton,
+            child: const Text('Voltar'),
+          ),
         ],
       ),
     );
